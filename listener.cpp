@@ -1,40 +1,50 @@
 #include "ros/ros.h"
 #include "std_msgs/String.h"
-#include <iostream>
+#include <sstream>
+#include <stdio.h>
 #include <opencv2/core/core.hpp>
 #include <opencv2/highgui/highgui.hpp>
-#include "geometry_msgs/Point.h"
-#include <cv_bridge/cv_bridge.h>
-/**
- * This tutorial demonstrates simple receipt of messages over the ROS system.
- */
-Mat image=imread("/home/krushna/catkin_ws/src/agv_task/src/pic3.png",CV_LOAD_IMAGE_COLOR);
-void chatterCallback(const geometry_msgs::Point::ConstPtr& pnt)
-{
-image.at<Vec3b>(pnt->x,pnt->y)[0]=220;
-imwrite( "/home/krushna/catkin_ws/src/agv_task/src/pic3.png");
+#include <iostream>
+#include <queue>
 
-  if(pnt->x==28.0 && pnt->y==32.0)
-  {
-    namedWindow("path",CV_WINDOW_NORMAL);
-    imshow("path", img);
-    waitKey(0);
-  
+using namespace cv;
+using namespace std;
+
+class point{
+public : int i,j;
+};
+
+queue<point> q;
+void chatterCallback(const std_msgs::String::ConstPtr& msg)
+{
+  point p;
+ //std::stringstream ss;
+  char * ss = new char [msg->data.length()+1];
+  std::strcpy (ss, msg->data.c_str());
+  sscanf(ss,"(%d,%d)",&p.i,&p.j);
+ q.push(p);
+ //ROS_INFO("I heard: [%s]", msg->data.c_str());
 }
 
 int main(int argc, char **argv)
 {
- /*  ros::init(argc, argv, "listener");
+ ros::init(argc, argv, "listener");
+ ros::NodeHandle n;
+ ros::Subscriber sub = n.subscribe("Path", 1000, chatterCallback);
+ ros::spin();
+Mat img = imread("/home/vivek/Downloads/ps1.png", CV_LOAD_IMAGE_COLOR);
 
-  
-  ros::NodeHandle n;
+do {
+  point p=q.front();
+  q.pop();
+  img.at<Vec3b>(p.i,p.j)[0]=255;
+  img.at<Vec3b>(p.i,p.j)[1]=0;
+  img.at<Vec3b>(p.i,p.j)[2]=0;
+} while(!q.empty());
 
- 
-  ros::Subscriber sub = n.subscribe("chatter", 1000, chatterCallback);
+namedWindow("Path", WINDOW_AUTOSIZE );
+ imshow( "Path", img);
 
-
-  ros::spin();
-
-  return 0;
-*/
-Mat img;}
+waitKey(0);
+ return 0;
+}
