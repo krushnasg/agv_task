@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 2.8.3)
-project(agv_task)
+project(beginner_tutorials)
 
 ## Find catkin macros and libraries
 ## if COMPONENTS list like find_package(catkin REQUIRED COMPONENTS xyz)
@@ -7,18 +7,13 @@ project(agv_task)
 find_package(catkin REQUIRED COMPONENTS
   roscpp
   rospy
-  message_generation
-  cv_bridge
-  image_transport
   std_msgs
-  geometry_msgs
+message_generation
 )
-
-
-
 
 ## System dependencies are found with CMake's conventions
 # find_package(Boost REQUIRED COMPONENTS system)
+
 
 ## Uncomment this if the package has a setup.py. This macro ensures
 ## modules and global scripts declared therein get installed
@@ -49,9 +44,17 @@ find_package(catkin REQUIRED COMPONENTS
 ##   * uncomment the generate_messages entry below
 ##   * add every package in MSG_DEP_SET to generate_messages(DEPENDENCIES ...)
 
-##add_message_files(DIRECTORY msg FILES Num.msg)
-##add_service_files(DIRECTORY srv FILES AddTwoInts.srv)
+## Generate messages in the 'msg' folder
+add_message_files(
+   FILES
+   Num.msg
+ )
 
+## Generate services in the 'srv' folder
+ add_service_files(
+   FILES
+  AddTwoInts.srv
+ )
 
 ## Generate actions in the 'action' folder
 # add_action_files(
@@ -61,8 +64,10 @@ find_package(catkin REQUIRED COMPONENTS
 # )
 
 ## Generate added messages and services with any dependencies listed here
-
-
+  generate_messages(
+   DEPENDENCIES
+   std_msgs
+ )
 
 ################################################
 ## Declare ROS dynamic reconfigure parameters ##
@@ -94,10 +99,10 @@ find_package(catkin REQUIRED COMPONENTS
 ## CATKIN_DEPENDS: catkin_packages dependent projects also need
 ## DEPENDS: system dependencies of this project that dependent projects also need
 catkin_package(
-#  INCLUDE_DIRS include
-#  LIBRARIES beginner_tutorials
-#  CATKIN_DEPENDS roscpp rospy std_msgs
-#  DEPENDS system_lib
+  INCLUDE_DIRS include
+  LIBRARIES beginner_tutorials
+ CATKIN_DEPENDS message_runtime roscpp rospy std_msgs 
+  DEPENDS system_lib
 )
 
 ###########
@@ -107,19 +112,9 @@ catkin_package(
 ## Specify additional locations of header files
 ## Your package locations should be listed before other locations
 # include_directories(include)
-
-find_package(OpenCV REQUIRED) 
-include_directories(include ${catkin_INCLUDE_DIRS} ${OpenCV_INCLUDE_DIRS})
-add_executable(talker src/talker.cpp)
-target_link_libraries( talker ${OpenCV_LIBS} ${catkin_LIBRARIES})
-
-
-add_executable(listener src/listener.cpp)
-target_link_libraries(listener ${OpenCV_LIBS} ${catkin_LIBRARIES})
-
-
-
-
+include_directories(
+  ${catkin_INCLUDE_DIRS}
+)
 
 ## Declare a C++ library
 # add_library(beginner_tutorials
@@ -191,4 +186,24 @@ target_link_libraries(listener ${OpenCV_LIBS} ${catkin_LIBRARIES})
 ## Add folders to be run by python nosetests
 # catkin_add_nosetests(test)
 
+include_directories(include ${catkin_INCLUDE_DIRS})
 
+add_executable(talker src/talker.cpp)
+target_link_libraries(talker ${catkin_LIBRARIES})
+add_dependencies(talker beginner_tutorials_generate_messages_cpp)
+
+#add_executable(ps2 src/ps2.cpp)
+#target_link_libraries(ps2 ${catkin_LIBRARIES})
+#add_dependencies(ps2 beginner_tutorials_generate_messages_cpp)
+
+   find_package(OpenCV)
+   include_directories(${OpenCV_INCLUDE_DIRS})
+   target_link_libraries(talker ${OpenCV_LIBRARIES})
+
+add_executable(listener src/listener.cpp)
+target_link_libraries(listener ${catkin_LIBRARIES})
+add_dependencies(listener beginner_tutorials_generate_messages_cpp)
+
+find_package(OpenCV)
+   include_directories(${OpenCV_INCLUDE_DIRS})
+   target_link_libraries(listener ${OpenCV_LIBRARIES})
